@@ -1,0 +1,36 @@
+-- how many orders for each product
+SELECT Product.ProductName, Product.ProductType, COUNT(OrderLine.OrderID) AS TotalProducts
+FROM Product
+JOIN OrderLine ON Product.ProductID = OrderLine.ProductID 
+GROUP BY Product.ProductName
+
+--how many orders for each product type
+SELECT Product.ProductType, COUNT(OrderLine.OrderID) AS TotalOrders
+FROM Product
+JOIN OrderLine ON Product.ProductID = OrderLine.ProductID 
+GROUP BY Product.ProductType
+
+--how many customers in Austin, Texas where Boombox Inc. is headquartered
+SELECT CustomerID, FirstName, LastName, City, [State]
+FROM Customer
+WHERE [State] IN (
+    SELECT [State]
+    FROM Customer
+    WHERE City = 'Austin'
+);
+
+--something viewing profit by product type/Product
+SELECT [Order].OrderID, OrderLine.Price - OrderLine.Cost AS Profit, Product.ProductName, Product.ProductType
+FROM OrderLine 
+JOIN Product 
+ON Product.ProductID = OrderLine.ProductID
+JOIN [Order]
+ON [Order].OrderID = OrderLine.OrderID
+ORDER BY Profit DESC
+
+--something viewing profit by season
+SELECT [Order].OrderID, OrderLine.Price - OrderLine.Cost AS Profit, [Order].OrderDate
+FROM OrderLine 
+JOIN [Order]
+ON [Order].OrderID = OrderLine.OrderID
+ORDER BY [Order].OrderDate DESC
