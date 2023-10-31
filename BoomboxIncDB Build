@@ -1,0 +1,195 @@
+--Create database
+IF NOT EXISTS(SELECT name FROM dbo.sysdatabases
+	WHERE name = N'BoomboxIncDB')
+	
+	CREATE DATABASE BoomboxIncDB
+	
+GO
+
+USE BoomboxIncDB
+GO
+
+--Drop tables if they exist
+
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'Product')
+	
+	DROP TABLE Product;
+	
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'Order')
+	
+	DROP TABLE [Order];	
+
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'Customer')
+	
+	DROP TABLE Customer;
+
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'Employee')
+	
+	DROP TABLE Employee;
+		
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'EmployeeType')
+	
+	DROP TABLE EmployeeType;
+
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'ProductLine')
+	
+	DROP TABLE ProductLine;
+
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'Supplier')
+	
+	DROP TABLE Supplier;
+
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'OrderLine')
+	
+	DROP TABLE OrderLine;
+	
+--Create tables
+CREATE TABLE Product (
+    ProductID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	ProductName NVARCHAR(50) NOT NULL,
+	Price MONEY NOT NULL,
+	[Cost] MONEY NOT NULL,
+	ProductType NVARCHAR(100) NOT NULL,
+);
+
+CREATE TABLE Customer (
+	CustomerID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	FirstName NVARCHAR(50) NOT NULL,
+	LastName NVARCHAR(50) NOT NULL,
+	Address NVARCHAR(255) NOT NULL,
+	City NVARCHAR(50) NOT NULL,
+	[State] NVARCHAR(2) NOT NULL,
+	ZipCode NVARCHAR(10) NOT NULL,
+	Phone NVARCHAR(20) NOT NULL,
+	Email NVARCHAR(100) NOT NULL
+);
+
+CREATE TABLE EmployeeType (
+	EmployeeTypeID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	EmployeeTypeName NVARCHAR(50) NOT NULL,
+);
+
+CREATE TABLE Employee (
+	EmployeeID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	FirstName NVARCHAR(50) NOT NULL,
+	LastName NVARCHAR(50) NOT NULL,
+	Address NVARCHAR(255) NOT NULL,
+	City NVARCHAR(50) NOT NULL,
+	[State] NVARCHAR(2) NOT NULL,
+	ZipCode NVARCHAR(10) NOT NULL,
+	Phone NVARCHAR(20) NOT NULL,
+	Email NVARCHAR(100) NOT NULL,
+	StartDate DATE NOT NULL,
+	EndDate DATE NOT NULL,
+	EmployeeTypeID NVARCHAR(50) CONSTRAINT FK_EmployeeTypeID FOREIGN KEY (EmployeeTypeID) REFERENCES EmployeeType(EmployeeTypeID)
+);
+
+CREATE TABLE Supplier (
+	SupplierID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	SupplierType NVARCHAR(50) NOT NULL,
+	Country NVARCHAR(50) NOT NULL,
+);
+
+CREATE TABLE ProductLine (
+	ProductLineID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	ProductID INT CONSTRAINT FK_ProductID FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
+	SupplierID INT CONSTRAINT FK_SupplierID FOREIGN KEY (SupplierID) REFERENCES Supplier(SupplierID)
+);
+
+CREATE TABLE [Order] (
+	OrderID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	OrderDate DATE NOT NULL,
+	ShipDate DATE NOT NULL,
+	CustomerID INT CONSTRAINT FK_CustomerID FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID),
+	EmployeeID INT CONSTRAINT FK_EmployeeID_Order FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID)
+);
+
+CREATE TABLE OrderLine (
+	OrderLineID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	Quantity INT NOT NULL,
+	Price MONEY NOT NULL,
+	Cost MONEY NOT NULL,
+	OrderID INT CONSTRAINT FK_OrderID FOREIGN KEY (OrderID) REFERENCES [Order](OrderID),
+	ProductID INT CONSTRAINT FK_ProductID_OrderLine FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
+);
+
+--Bulk load database
+BULK INSERT Product
+FROM 'C:\DM Solution\Build BoomboxInc\BoomboxInc\PRODUCT.csv'
+WITH (
+    FIELDTERMINATOR = ',', -- specify the field delimiter used in the file
+    ROWTERMINATOR = '\n' -- specify the line delimiter used in the file
+)
+
+BULK INSERT Customer
+FROM 'C:\DM Solution\Build BoomboxInc\BoomboxInc\CUSTOMER.csv'
+WITH (
+    FIELDTERMINATOR = ',', -- specify the field delimiter used in the file
+    ROWTERMINATOR = '\n' -- specify the line delimiter used in the file
+)
+
+BULK INSERT Employee
+FROM 'C:\DM Solution\Build BoomboxInc\BoomboxInc\EMPLOYEE.csv'
+WITH (
+    FIELDTERMINATOR = ',', -- specify the field delimiter used in the file
+    ROWTERMINATOR = '\n' -- specify the line delimiter used in the file
+)
+
+BULK INSERT EmployeeType
+FROM 'C:\DM Solution\Build BoomboxInc\BoomboxInc\EMPLOYEETYPE.csv'
+WITH (
+    FIELDTERMINATOR = ',', -- specify the field delimiter used in the file
+    ROWTERMINATOR = '\n' -- specify the line delimiter used in the file
+)
+
+BULK INSERT Supplier
+FROM 'C:\DM Solution\Build BoomboxInc\BoomboxInc\SUPPLIER.csv'
+WITH (
+    FIELDTERMINATOR = ',', -- specify the field delimiter used in the file
+    ROWTERMINATOR = '\n' -- specify the line delimiter used in the file
+)
+
+BULK INSERT ProductLine
+FROM 'C:\DM Solution\Build BoomboxInc\BoomboxInc\PRODUCTLINE.csv'
+WITH (
+    FIELDTERMINATOR = ',', -- specify the field delimiter used in the file
+    ROWTERMINATOR = '\n' -- specify the line delimiter used in the file
+)
+
+BULK INSERT [Order]
+FROM 'C:\DM Solution\Build BoomboxInc\BoomboxInc\ORDER.csv'
+WITH (
+    FIELDTERMINATOR = ',', -- specify the field delimiter used in the file
+    ROWTERMINATOR = '\n' -- specify the line delimiter used in the file
+)
+
+BULK INSERT OrderLine
+FROM 'C:\DM Solution\Build BoomboxInc\BoomboxInc\ORDERLINE.csv'
+WITH (
+    FIELDTERMINATOR = ',', -- specify the field delimiter used in the file
+    ROWTERMINATOR = '\n' -- specify the line delimiter used in the file
+)
