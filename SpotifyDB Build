@@ -1,0 +1,262 @@
+/* COURSE PROJECT PART 1 */
+/* Isaiah Erb, INFO 3240 */
+
+/* CREATE DATABASE */
+IF NOT EXISTS (SELECT * FROM sys.databases
+	WHERE NAME = N'SpotifyDatabase')
+	CREATE DATABASE SpotifyDatabase
+GO 
+USE SpotifyDatabase
+
+/* DELETE EXISTING TABLES */
+USE SpotifyDatabase
+
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'CollaboratorTbl'
+       )
+	DROP TABLE CollaboratorTbl;
+	
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'TracklistTbl'
+       )
+	DROP TABLE TracklistTbl;
+	
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'PlaylistTbl'
+       )
+	DROP TABLE PlaylistTbl;
+	
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'SongTbl'
+       )
+	DROP TABLE SongTbl;
+	
+	
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'AlbumTbl'
+       )
+	DROP TABLE AlbumTbl;
+	
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'LabelTbl'
+       )
+	DROP TABLE LabelTbl;
+	
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'ArtistTbl'
+       )
+	DROP TABLE ArtistTbl;
+	
+IF EXISTS(
+	SELECT *
+	FROM sys.tables
+	WHERE NAME = N'UserTbl'
+       )
+	DROP TABLE UserTbl;
+	
+--
+
+/* TABLE CREATION (8 TABLES) */
+USE SpotifyDatabase
+
+CREATE TABLE UserTbl
+	(UserID INT CONSTRAINT pk_user_id PRIMARY KEY,
+	Username VARCHAR(100) NOT NULL,
+	UserFirstName VARCHAR(100) NOT NULL,
+	UserLastName VARCHAR(100) NOT NULL,
+	Email VARCHAR(100),
+	Birthdate Date NOT NULL,
+	Address VARCHAR(200) NOT NULL,
+	City VARCHAR(100) NOT NULL,
+	[State] NVARCHAR(5) NOT NULL,
+	ZipCode INT NOT NULL,
+	Country VARCHAR(100) NOT NULL,
+	SubscriptionType VARCHAR(50) NOT NULL
+	);
+
+CREATE TABLE ArtistTbl
+	(ArtistID INT CONSTRAINT pk_artist_id PRIMARY KEY,
+	ArtistName VARCHAR(100) NOT NULL,
+	ArtistFollowers INT NOT NULL,
+	ArtistMonthlyListeners INT NOT NULL
+	);
+	
+CREATE TABLE LabelTbl
+	(LabelID INT CONSTRAINT pk_label_id PRIMARY KEY,
+	LabelName VARCHAR(100) NOT NULL
+	);
+
+CREATE TABLE AlbumTbl
+	(AlbumID INT CONSTRAINT pk_album_id PRIMARY KEY,
+	LabelID INT CONSTRAINT fk_album_label_id FOREIGN KEY
+		REFERENCES LabelTbl(LabelID),
+	ArtistID INT CONSTRAINT fk_album_artist_id FOREIGN KEY
+		REFERENCES ArtistTbl(ArtistID),
+	AlbumName VARCHAR(255) NOT NULL,
+	AlbumReleaseDate DATE DEFAULT GetDate() NOT NULL
+	);
+
+CREATE TABLE SongTbl
+	(SongID INT CONSTRAINT pk_song_id PRIMARY KEY,
+	ArtistID INT CONSTRAINT fk_song_artist_id FOREIGN KEY
+		REFERENCES ArtistTbl(ArtistID),
+	AlbumID INT CONSTRAINT fk_song_album_id FOREIGN KEY
+		REFERENCES AlbumTbl(AlbumID),
+	SongName VARCHAR(255) NOT NULL,
+	Duration TIME NOT NULL,
+	NumPlays INT NOT NULL
+	);
+
+CREATE TABLE PlaylistTbl
+	(PlaylistID INT CONSTRAINT pk_playlist_id PRIMARY KEY,
+	UserID INT CONSTRAINT fk_playlist_user_id FOREIGN KEY
+		REFERENCES UserTbl(UserID),
+	PlaylistName VARCHAR(255),
+	CreationDate DATE DEFAULT GetDate() NOT NULL,
+	NumSongs INT DEFAULT 0 NOT NULL, 
+	NumFollowers INT DEFAULT 0 NOT NULL,
+	DurationMinutes INT NOT NULL,
+	Collaboration NVARCHAR(50) NOT NULL
+	);
+
+CREATE TABLE TracklistTbl
+	(TracklistID INT CONSTRAINT pk_tracklist_id PRIMARY KEY,
+	PlaylistID INT CONSTRAINT fk_tracklist_playlist_id FOREIGN KEY
+		REFERENCES PlaylistTbl(PlaylistID),
+	SongID INT CONSTRAINT fk_tracklist_song_id FOREIGN KEY
+		REFERENCES SongTbl(SongID),
+	AlbumID INT CONSTRAINT fk_tracklist_album_id FOREIGN KEY
+		REFERENCES AlbumTbl(AlbumID),
+	Position INT DEFAULT 0 NOT NULL
+	);
+
+CREATE TABLE CollaboratorTbl
+	(CollaboratorID INT CONSTRAINT pk_collaborator_id PRIMARY KEY,
+	UserID INT CONSTRAINT fk_collaborator_user_id FOREIGN KEY
+		REFERENCES UserTbl(UserID),
+	PlaylistID INT CONSTRAINT fk_collaborator_playlist_id FOREIGN KEY
+		REFERENCES PlaylistTbl(PlaylistID)
+	);
+	
+GO
+
+--
+
+/* LOAD TABLE DATA */
+DECLARE @data_path NVARCHAR(256);
+SELECT @data_path = '\\Mac\Home\Documents\DU 22-23 Fall Quarter\INFO 3240\COURSE PROJECT\SpotifyData\'
+
+EXECUTE (N'BULK INSERT UserTbl FROM ''' + @data_path + N'UserTbl.csv''
+WITH (
+	CHECK_CONSTRAINTS,
+	CODEPAGE=''ACP'',
+	DATAFILETYPE = ''char'',
+	FIELDTERMINATOR= '','',
+	ROWTERMINATOR = ''\n'',
+	KEEPIDENTITY,
+	TABLOCK
+	);
+');
+
+EXECUTE (N'BULK INSERT ArtistTbl FROM ''' + @data_path + N'ArtistTbl.csv''
+WITH (
+	CHECK_CONSTRAINTS,
+	CODEPAGE=''ACP'',
+	DATAFILETYPE = ''char'',
+	FIELDTERMINATOR= '','',
+	ROWTERMINATOR = ''\n'',
+	KEEPIDENTITY,
+	TABLOCK
+	);
+');
+
+EXECUTE (N'BULK INSERT LabelTbl FROM ''' + @data_path + N'LabelTbl.csv''
+WITH (
+	CHECK_CONSTRAINTS,
+	CODEPAGE=''ACP'',
+	DATAFILETYPE = ''char'',
+	FIELDTERMINATOR= '','',
+	ROWTERMINATOR = ''\n'',
+	KEEPIDENTITY,
+	TABLOCK
+	);
+');
+
+EXECUTE (N'BULK INSERT AlbumTbl FROM ''' + @data_path + N'AlbumTbl.csv''
+WITH (
+	CHECK_CONSTRAINTS,
+	CODEPAGE=''ACP'',
+	DATAFILETYPE = ''char'',
+	FIELDTERMINATOR= '','',
+	ROWTERMINATOR = ''\n'',
+	KEEPIDENTITY,
+	TABLOCK
+	);
+');
+
+EXECUTE (N'BULK INSERT SongTbl FROM ''' + @data_path + N'SongTbl.csv''
+WITH (
+	CHECK_CONSTRAINTS,
+	CODEPAGE=''ACP'',
+	DATAFILETYPE = ''char'',
+	FIELDTERMINATOR= '','',
+	ROWTERMINATOR = ''\n'',
+	KEEPIDENTITY,
+	TABLOCK
+	);
+');
+
+EXECUTE (N'BULK INSERT PlaylistTbl FROM ''' + @data_path + N'PlaylistTbl.csv''
+WITH (
+	CHECK_CONSTRAINTS,
+	CODEPAGE=''ACP'',
+	DATAFILETYPE = ''char'',
+	FIELDTERMINATOR= '','',
+	ROWTERMINATOR = ''\n'',
+	KEEPIDENTITY,
+	TABLOCK
+	);
+');
+
+EXECUTE (N'BULK INSERT TracklistTbl FROM ''' + @data_path + N'TracklistTbl.csv''
+WITH (
+	CHECK_CONSTRAINTS,
+	CODEPAGE=''ACP'',
+	DATAFILETYPE = ''char'',
+	FIELDTERMINATOR= '','',
+	ROWTERMINATOR = ''\n'',
+	KEEPIDENTITY,
+	TABLOCK
+	);
+');
+
+EXECUTE (N'BULK INSERT CollaboratorTbl FROM ''' + @data_path + N'CollaboratorTbl.csv''
+WITH (
+	CHECK_CONSTRAINTS,
+	CODEPAGE=''ACP'',
+	DATAFILETYPE = ''char'',
+	FIELDTERMINATOR= '','',
+	ROWTERMINATOR = ''\n'',
+	KEEPIDENTITY,
+	TABLOCK
+	);
+');
+
+'
+--
+
+	
