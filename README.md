@@ -11,5 +11,8 @@ Spearheaded the establishment of a relational database for a hypothetical speake
 European Soccer DB Project:
 Led a database initiative encompassing exhaustive information on teams, leagues, and matches in European Soccer spanning seasons 2008-2016. Leveraging data from Kaggle, undertook comprehensive analysis and querying tasks, showcasing a strong command of SQL for data manipulation and strategic insights in the context of European soccer datasets.
 
+Spotify Top 50 Songs Analysis Project:
+This project exemplifies my adeptness in SQL querying and proficiency in utilizing Python analysis techniques. Focused on the top 50 songs on Spotify in 2021, the analysis integrates advanced methods like the Random Forest Regressor to identify the factors exerting the most influence on a song's popularity. This demonstrates a holistic approach to data exploration, combining SQL skills for database interaction with sophisticated analytical techniques in Python to derive meaningful insights from the dataset.
+
 # About Me
 I am a motivated data analyst seeking new opportunities to apply my SQL skills. I have experience working with large datasets across industries like retail, healthcare, and finance. Please reach out if you would like to discuss potential data projects and roles!
