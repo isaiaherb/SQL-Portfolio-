@@ -1,0 +1,47 @@
+
+/* VIEW */
+CREATE VIEW Collaborations
+AS
+SELECT PlaylistTbl.PlaylistID, PlaylistTbl.PlaylistName, PlaylistTbl.CreationDate, PlaylistTbl.Collaboration
+FROM PlaylistTbl
+INNER JOIN UserTbl
+	ON UserTbl.UserID = PlaylistTbl.UserID
+INNER JOIN CollaboratorTbl
+	ON CollaboratorTbl.UserID = UserTbl.UserID
+WHERE Collaboration = 'TRUE'
+WITH CHECK OPTION;
+
+GO
+
+/* USER-DEFINED FUNCTION */
+CREATE FUNCTION FormattedAddress
+	(@Address VARCHAR(100), @State VARCHAR(2), @City VARCHAR(100), @ZipCode INT)
+	RETURNS VARCHAR(255) AS
+BEGIN 
+	DECLARE @FullAddress VARCHAR(100)
+
+	SET @FullAddress = CONCAT(@Address, ', ', @City, ', ', @State, ', ', @ZipCode)
+
+	RETURN @FullAddress
+END;
+
+SELECT dbo.FormattedAddress('2080 South Josephine Street', 'CO', 'Denver', 80210) AS "FormattedAddress"
+
+/* PROCEDURE */
+CREATE PROCEDURE AlbumSongs (@AlbumName VARCHAR(100) = NULL) 
+AS
+BEGIN
+	SELECT DISTINCT ArtistTbl.ArtistName, 
+		AlbumTbl.AlbumName, 
+		AlbumTbl.AlbumReleaseDate,
+		SongTbl.SongName
+	FROM ArtistTbl
+	INNER JOIN AlbumTbl
+		ON AlbumTbl.ArtistID = ArtistTbl.ArtistID
+	INNER JOIN SongTbl
+		ON SongTbl.AlbumID = AlbumTbl.AlbumID
+	WHERE AlbumName = @AlbumName
+	ORDER BY AlbumTbl.AlbumReleaseDate DESC
+END;
+
+EXECUTE AlbumSongs @AlbumName = 'OK Computer'
